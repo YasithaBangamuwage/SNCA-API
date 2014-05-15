@@ -23,7 +23,7 @@ public class MysqlConnection {
 
 	// Database credentials
 	static final String USER = "root";
-	static final String PASSWORD = "123";
+	static final String PASSWORD = "abc123";
 
 	public Connection conn;
 	private Statement statement;

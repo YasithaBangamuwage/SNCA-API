@@ -15,12 +15,12 @@ public class WekaInstances {
 	private static InstanceQuery query;
 	// Database credentials
 	static final String USER = "root";
-	static final String PASSWORD = "123";
+	static final String PASSWORD = "abc123";
 
 	private WekaInstances() throws Exception {
 		query = new InstanceQuery();
 		query.setUsername("root");
-		query.setPassword("123");
+		query.setPassword("abc123");
 	}
 
 	public static synchronized WekaInstances connect() throws Exception {
