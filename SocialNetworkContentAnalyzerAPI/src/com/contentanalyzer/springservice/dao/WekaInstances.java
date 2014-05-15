@@ -1,5 +1,6 @@
 package com.contentanalyzer.springservice.dao;
 
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.experiment.InstanceQuery;
 
@@ -15,12 +16,12 @@ public class WekaInstances {
 	private static InstanceQuery query;
 	// Database credentials
 	static final String USER = "root";
-	static final String PASSWORD = "123";
+	static final String PASSWORD = "abc123";
 
 	private WekaInstances() throws Exception {
 		query = new InstanceQuery();
-		query.setUsername("root");
-		query.setPassword("123");
+		query.setUsername(USER);
+		query.setPassword(PASSWORD);
 	}
 
 	public static synchronized WekaInstances connect() throws Exception {
