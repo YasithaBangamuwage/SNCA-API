@@ -20,13 +20,9 @@ public class WekaInstances {
 
 	private WekaInstances() throws Exception {
 		query = new InstanceQuery();
-<<<<<<< HEAD
 		query.setUsername(USER);
 		query.setPassword(PASSWORD);
-=======
-		query.setUsername("root");
-		query.setPassword("abc123");
->>>>>>> eb30c2f9f1c6c8483fa57829c8531db48af02acf
+
 	}
 
 	public static synchronized WekaInstances connect() throws Exception {
