@@ -1,16 +1,12 @@
 package com.contentanalyzer.springservice.controller;
 
-import java.sql.ResultSet;
-
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.contentanalyzer.springservice.dao.MysqlConnection;
 import com.contentanalyzer.springservice.dao.WekaInstances;
 import com.contentanalyzer.springservice.domain.Classification;
-import com.contentanalyzer.springservice.domain.Preprocessing;
+import com.contentanalyzer.springservice.domain.test;
 
 @RestController
 @RequestMapping("/classification")
@@ -31,6 +27,15 @@ public class ClassificationController {
 
 	@RequestMapping(value = "/smo/adnull", method = RequestMethod.GET)
 	public void testing() throws Exception {
-
+		test classifier;
+		//if (args.length < 2)
+			//System.out.println("Usage: java MyClassifier <fileData> <fileModel>");
+		//else {
+			classifier = new test();
+			//classifier.load(args[0]);
+			classifier.loadModel();
+			classifier.makeInstance();
+			classifier.classify();
+		//}
 	}
 }

@@ -46,6 +46,8 @@ public class Classification {
 			System.out.println("clsLabel : " + clsLabel);
 			labeled.instance(i).setClassValue(clsLabel);
 			System.out.println(labeled.instance(i).classValue());
+			System.out.println("Class predicted: " + testingData.classAttribute().value((int) clsLabel));
+			
 		}
 	}
 }
