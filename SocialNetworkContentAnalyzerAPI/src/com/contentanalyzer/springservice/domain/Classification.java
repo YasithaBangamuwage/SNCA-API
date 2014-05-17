@@ -1,6 +1,8 @@
 package com.contentanalyzer.springservice.domain;
 
+import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
+import weka.core.Instance;
 import weka.core.Instances;
 
 public class Classification {
@@ -34,6 +36,11 @@ public class Classification {
 		trainingData.setClassIndex(trainingData.numAttributes() - 1);
 		smo.setOptions(new String[] { "-R" });
 		smo.buildClassifier(trainingData);
+		smo.turnChecksOn();
+		Evaluation eTest = new Evaluation(trainingData); 
+        eTest.evaluateModel(smo,trainingData); 
+        System.out.println(eTest.toSummaryString());
+        System.out.println(smo.toString());
 	}
 
 	public void testClassifier() throws Exception {
@@ -46,8 +53,10 @@ public class Classification {
 			System.out.println("clsLabel : " + clsLabel);
 			labeled.instance(i).setClassValue(clsLabel);
 			System.out.println(labeled.instance(i).classValue());
-			System.out.println("Class predicted: " + testingData.classAttribute().value((int) clsLabel));
-			
+			System.out.println("Class predicted: " + trainingData.classAttribute().value((int) clsLabel));	
 		}
+		Evaluation eTest = new Evaluation(testingData); 
+        eTest.evaluateModel(smo,testingData); 
+        System.out.println(eTest.toSummaryString());
 	}
 }

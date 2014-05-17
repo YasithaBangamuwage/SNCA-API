@@ -28,14 +28,9 @@ public class ClassificationController {
 	@RequestMapping(value = "/smo/adnull", method = RequestMethod.GET)
 	public void testing() throws Exception {
 		test classifier;
-		//if (args.length < 2)
-			//System.out.println("Usage: java MyClassifier <fileData> <fileModel>");
-		//else {
 			classifier = new test();
-			//classifier.load(args[0]);
 			classifier.loadModel();
 			classifier.makeInstance();
 			classifier.classify();
-		//}
 	}
 }
