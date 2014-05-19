@@ -44,7 +44,7 @@ public class Classification {
 			double clsLabel = smo.classifyInstance(testingData.instance(i));
 			System.out.println(testingData.instance(i));
 			System.out.println("clsLabel : " + clsLabel);
-			labeled.instance(i).setClassValue(clsLabel);
+			labeled.instance(i).setClassValue((int)clsLabel);
 			System.out.println(labeled.instance(i).classValue());
 		}
 	}

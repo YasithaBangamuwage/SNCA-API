@@ -37,23 +37,30 @@ public class Preprocessing {
 	 * string data that user entered
 	 */
 
-	private String searchString;
+	private String stringValue;
+
 	/*
 	 * contains feature words
 	 */
 	private ArrayList<String> featureWords;
 
+	private ArrayList<String> filteredTokens;
+
 	private POSTagger postagger = new POSTagger();
 	private List<Token> tokenList = new ArrayList<Token>();
 
+	public Preprocessing() {
+		filteredTokens = new ArrayList<String>();
+	}
+
 	public Preprocessing(String searchString) {
-		this.searchString = searchString;
-		this.tokenizeSearchString();
+		this.stringValue = searchString;
+		this.tokenizeStringValue();
 	}
 
 	public Preprocessing(Instances inputInstances, String searchString) {
 		this.inputInstances = inputInstances;
-		this.searchString = searchString;
+		this.stringValue = searchString;
 
 		// change this after integrate with db
 		this.featureWords = new ArrayList<String>();
@@ -64,8 +71,24 @@ public class Preprocessing {
 		featureWords.add("happy");
 
 		this.tokenizeInstances();
-		this.tokenizeSearchString();
+		this.tokenizeStringValue();
 
+	}
+
+	public void setFilteredTokens(ArrayList<String> filteredTokens) {
+		this.filteredTokens = filteredTokens;
+	}
+
+	public ArrayList<String> getFilteredTokens1() {
+		return filteredTokens;
+	}
+
+	public String getStringValue() {
+		return stringValue;
+	}
+
+	public void setStringValue(String stringValue) {
+		this.stringValue = stringValue;
 	}
 
 	private void tokenizeInstances() {
@@ -80,8 +103,8 @@ public class Preprocessing {
 		}
 	}
 
-	private void tokenizeSearchString() {
-		tokenList.addAll(postagger.runPOSTagger(searchString));
+	public  void tokenizeStringValue() {
+		tokenList.addAll(postagger.runPOSTagger(stringValue));
 	}
 
 	public void test() {
@@ -99,6 +122,25 @@ public class Preprocessing {
 				}
 			}
 		}
+	}
+
+	public ArrayList<String> getFilteredTokens() {
+		
+		// loop through selected attribute token data
+		for (Token token : tokenList) {
+			switch (token.getPOS()) {
+			case "A":
+			case "R":
+			case "#":
+			case "^":
+			case "N":
+				String word = token.getWord().replaceAll("#", "");
+				if (!filteredTokens.contains(word)) {
+					filteredTokens.add(word);
+				}
+			}
+		}
+		return filteredTokens;
 	}
 
 }

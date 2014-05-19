@@ -1,15 +1,20 @@
 package com.contentanalyzer.springservice.controller;
 
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import sun.security.jca.GetInstance.Instance;
 import weka.core.Instances;
 
 import com.contentanalyzer.springservice.dao.MysqlConnection;
 import com.contentanalyzer.springservice.dao.WekaInstances;
+import com.contentanalyzer.springservice.domain.JsonMessage;
 import com.contentanalyzer.springservice.domain.Preprocessing;
 
 /**
@@ -18,7 +23,7 @@ import com.contentanalyzer.springservice.domain.Preprocessing;
  * @author YAS
  ***/
 @RestController
-@RequestMapping("/preprocessing/user")
+@RequestMapping("/preprocessing")
 public class PreprocessingController {
 
 	/**
@@ -30,7 +35,6 @@ public class PreprocessingController {
 	public void defaultFilterAdsUsingWeka(@PathVariable String searchString)
 			throws Exception {
 		System.out.println("user not register with our app");
-
 	}
 
 	/**
@@ -82,4 +86,47 @@ public class PreprocessingController {
 		}
 	}
 
+	@RequestMapping(value = "filterAdWords/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
+	public JsonMessage filterFeatureWords(@PathVariable String id)
+			throws Exception {
+		Preprocessing preprocessing = new Preprocessing();
+		ArrayList<String> tokenSet = new ArrayList<String>();
+		ResultSet res = MysqlConnection
+				.getDbConnection()
+				.getQueryData(
+						"SELECT advertisements.FILTERED_WORDS, advertisements.NAME, advertisements.DESCRIPTION "
+								+ "FROM wekadb.advertisements WHERE advertisements.ADVERTISEMENT_ID ="
+								+ id + ";");
+		while (res.next()) {
+			tokenSet.addAll(Arrays.asList(res.getString(1).split("\\s*,\\s*")));
+			preprocessing.setStringValue(res.getString(2));
+			preprocessing.tokenizeStringValue();
+			preprocessing.setStringValue(res.getString(3));
+			preprocessing.tokenizeStringValue();
+		}
+		tokenSet.addAll(preprocessing.getFilteredTokens());
+		// Converting ArrayList to HashSet to remove duplicates
+		HashSet<String> listToSet = new HashSet<String>(tokenSet);
+		// Creating ArrayList without duplicate values
+		ArrayList<String> listWithoutDuplicates = new ArrayList<String>(
+				listToSet);
+		String udatedFilterWordList = listWithoutDuplicates.toString()
+				.substring(1, listWithoutDuplicates.toString().length() - 1);
+		int updateStatus = MysqlConnection.getDbConnection().update(
+				"UPDATE advertisements SET advertisements.FILTERED_WORDS='"
+						+ udatedFilterWordList
+						+ "'  WHERE advertisements.ADVERTISEMENT_ID =" + id
+						+ ";");
+		// check update query works or not
+		JsonMessage jm = new JsonMessage();
+		if (updateStatus == 1) {
+			jm.setId(updateStatus);
+			jm.setMsg("Success");
+		} else {
+
+			jm.setId(updateStatus);
+			jm.setMsg("Fail");
+		}
+		return jm;
+	}
 }
