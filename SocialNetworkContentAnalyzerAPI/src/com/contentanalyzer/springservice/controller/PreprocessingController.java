@@ -3,7 +3,9 @@ package com.contentanalyzer.springservice.controller;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,14 +73,37 @@ public class PreprocessingController {
 			Instances datbaseInput = WekaInstances
 					.connect()
 					.getQueryData(
-							"SELECT name, description, story, message, comments FROM wekadb.social_feeds;");
+							"SELECT name FROM wekadb.test4;");
+			ResultSet res = MysqlConnection.getDbConnection().getQueryData("SELECT * FROM Feature_Words;");
+			ArrayList<String> featureWordSet = new ArrayList<String>();
+			while(res.next()){
+				featureWordSet.add(res.getString(1));
+			}
 			Preprocessing preprocessing = new Preprocessing(datbaseInput,
-					searchString);
-			// preprocessing.preprocessingWithTweetPOSTagger();
-			preprocessing.test();
-			// do preprocessing
+					searchString, featureWordSet);
+		
+			preprocessing.tokenizeInstances();
+			preprocessing.tokenizeStringValue();
+			//get all filtered tokens
+			preprocessing.createFilteredTokensSet();
+			//get ads feature words set
+			Map<String, ArrayList<String>> adsMap = new HashMap<String, ArrayList<String>>();
+			ArrayList<String> adsFWordsSet = new ArrayList<String>();
+			 ResultSet res2 = MysqlConnection.getDbConnection().getQueryData("SELECT advertisements.ADVERTISEMENT_ID, advertisements.FILTERED_WORDS  FROM wekadb.advertisements");
+			 while(res2.next()){
+				 
+				 adsFWordsSet.addAll(Arrays.asList(res2.getString(2).split("\\s*,\\s*")));
+				 adsMap.put(res2.getString(1), adsFWordsSet);
+				}
+			 System.out.println("filtered ads : "+preprocessing.mapFilteredTokens(adsMap).toString());
+			
+			
+			
 			// update database tables
 			// return filter ad list
+			
+			
+			
 		} else if (!userSNDataExists) {
 			System.out.println("user SN data does not exsits !! ");
 		} else if (userSNDataExists && searchString.equals("")) {
@@ -105,16 +130,21 @@ public class PreprocessingController {
 			preprocessing.tokenizeStringValue();
 		}
 		tokenSet.addAll(preprocessing.getFilteredTokens());
+		
+		
+		
 		// Converting ArrayList to HashSet to remove duplicates
 		HashSet<String> listToSet = new HashSet<String>(tokenSet);
 		// Creating ArrayList without duplicate values
 		ArrayList<String> listWithoutDuplicates = new ArrayList<String>(
 				listToSet);
-		String udatedFilterWordList = listWithoutDuplicates.toString()
+		
+		
+		String updatedFilterWordList = listWithoutDuplicates.toString()
 				.substring(1, listWithoutDuplicates.toString().length() - 1);
 		int updateStatus = MysqlConnection.getDbConnection().update(
 				"UPDATE advertisements SET advertisements.FILTERED_WORDS='"
-						+ udatedFilterWordList
+						+ updatedFilterWordList
 						+ "'  WHERE advertisements.ADVERTISEMENT_ID =" + id
 						+ ";");
 		// check update query works or not
