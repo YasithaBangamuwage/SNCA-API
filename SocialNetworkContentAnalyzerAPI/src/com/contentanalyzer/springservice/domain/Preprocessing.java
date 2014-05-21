@@ -109,7 +109,7 @@ public class Preprocessing {
 			case "R":
 			case "#":
 				String word = token.getWord();
-				System.out.println("choose by filter : "+word);
+				System.out.println("choose by filter v: "+word);
 				if (!filteredTokens.contains(word)) {
 					System.out.println("add to filteredTokens : "+word);
 					filteredTokens.add(word);
