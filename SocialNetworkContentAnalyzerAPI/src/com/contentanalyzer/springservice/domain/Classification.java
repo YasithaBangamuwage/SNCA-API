@@ -44,7 +44,7 @@ public class Classification {
 	}
 
 	public void testClassifier() throws Exception {
-		testingData.setClassIndex(testingData.numAttributes() - 1);
+		testingData.setClassIndex(testingData.numAttributes() - 2);
 		Instances labeled = new Instances(testingData);
 
 		for (int i = 0; i < testingData.numInstances(); i++) {

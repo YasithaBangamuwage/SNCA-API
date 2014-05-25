@@ -17,9 +17,9 @@ public class ClassificationController {
 
 		Classification classification = new Classification(WekaInstances
 				.connect().getQueryData(
-						"select * from trainingdata where ad is not null;"),
+						"select filtered_feed, classified_ads from filtered_feeds where classified_ads is not null;"),
 				WekaInstances.connect().getQueryData(
-						"select * from trainingdata where ad is null;"));
+						"select filtered_feed, classified_ads from filtered_feeds where classified_ads is null;"));
 		classification.trainClassifier();
 		classification.testClassifier();
 
