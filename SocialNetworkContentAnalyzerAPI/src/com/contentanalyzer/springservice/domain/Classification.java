@@ -1,5 +1,7 @@
 package com.contentanalyzer.springservice.domain;
 
+import java.util.HashMap;
+import java.util.Map;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
 import weka.core.Instance;
@@ -9,6 +11,11 @@ public class Classification {
 
 	private Instances trainingData;
 	private Instances testingData;
+	private Map <Integer, String> classifiedAds = new HashMap<Integer, String>();
+	public Map getClassifiedAds() {
+		return classifiedAds;
+	}
+
 	SMO smo = new SMO();
 
 	public Classification(Instances trainingData, Instances testingData) {
@@ -39,8 +46,8 @@ public class Classification {
 		smo.turnChecksOn();
 		Evaluation eTest = new Evaluation(trainingData); 
         eTest.evaluateModel(smo,trainingData); 
-        System.out.println(eTest.toSummaryString());
-        System.out.println(smo.toString());
+        //System.out.println(eTest.toSummaryString());
+        //System.out.println(smo.toString());
 	}
 
 	public void testClassifier() throws Exception {
@@ -49,12 +56,16 @@ public class Classification {
 
 		for (int i = 0; i < testingData.numInstances(); i++) {
 			double clsLabel = smo.classifyInstance(testingData.instance(i));
-			System.out.println(testingData.instance(i));
-			System.out.println("clsLabel : " + clsLabel);
+			//System.out.println("clsLabel : " + clsLabel);
 			labeled.instance(i).setClassValue(clsLabel);
-			System.out.println(labeled.instance(i).classValue());
-			System.out.println("Class predicted: " + trainingData.classAttribute().value((int) clsLabel));	
+			//System.out.println(labeled.instance(i).classValue());	
+			Instance ins = testingData.instance(i);
+			System.out.println("Id : "+ins.value(0));
+			System.out.println("Class predicted: " + trainingData.classAttribute().value((int) clsLabel));
+			classifiedAds.put((int)ins.value(0), trainingData.classAttribute().value((int) clsLabel));
+			//xxxx = trainingData.classAttribute().value((int) clsLabel);
 		}
+		System.out.println(classifiedAds.toString());
 		Evaluation eTest = new Evaluation(testingData); 
         eTest.evaluateModel(smo,testingData); 
         System.out.println(eTest.toSummaryString());
