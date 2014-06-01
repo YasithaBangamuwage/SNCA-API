@@ -8,17 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import snowballstemmer.PorterStemmer;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.tokenizers.NGramTokenizer;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.StringToWordVector;
 import cmu.arktweetnlp.POSTagger;
 import cmu.arktweetnlp.Token;
-
-import com.contentanalyzer.springservice.dao.MysqlConnection;
-import com.contentanalyzer.springservice.dao.WekaInstances;
 
 /**
  * @author YAS
@@ -26,16 +20,12 @@ import com.contentanalyzer.springservice.dao.WekaInstances;
  * @Desc for do all Preprocessing operations
  * */
 public class Preprocessing {
-
+	
+	public static int x=0;
 	/**
 	 * Instances to be indexed.
 	 */
 	private Instances inputInstances;
-	/**
-	 * Instances after indexing.
-	 */
-	private Instances outputInstances;
-
 	/*
 	 * string data that user entered
 	 */
@@ -47,33 +37,33 @@ public class Preprocessing {
 	 */
 	private ArrayList<String> featureWords;
 
-	private ArrayList<String> filteredTokens;
-
+	private ArrayList<String> filteredWTokenSet = new ArrayList<String>();
+	private ArrayList<String> filteredwords = new ArrayList<String>();
 	private POSTagger postagger = new POSTagger();
 	private List<Token> tokenList = new ArrayList<Token>();
 
 	public Preprocessing() {
-		filteredTokens = new ArrayList<String>();
+
 	}
 
-	public Preprocessing(String searchString) {
-		this.stringValue = searchString;
-		this.tokenizeStringValue();
-	}
-
-	public Preprocessing(Instances inputInstances, String searchString,
-			ArrayList<String> featureWords) {
-		this.inputInstances = inputInstances;
+	public Preprocessing(String searchString, ArrayList<String> featureWords) {
 		this.stringValue = searchString;
 		this.featureWords = featureWords;
-		filteredTokens = new ArrayList<String>();
-		// change this after integrate with db
-		/*
-		 * this.featureWords = new ArrayList<String>(); featureWords.add("cat");
-		 * featureWords.add(":)"); featureWords.add("use");
-		 * featureWords.add("likes"); featureWords.add("happy");
-		 */
+		this.POSTagerTokenizeStringValue();
+		this.createFilteredTokens();
+		this.applayPorterStemmer();
+	}
 
+	public Preprocessing(Instances inputInstances,
+			ArrayList<String> featureWords) {
+		this.inputInstances = inputInstances;
+		this.featureWords = featureWords;
+		this.POSTagerTokenizeInstances();
+		this.createFilteredTokens();
+		this.applayPorterStemmer();
+
+		// join with featurewords
+		// make weight for filtered word set
 	}
 
 	public String getStringValue() {
@@ -84,43 +74,43 @@ public class Preprocessing {
 		this.stringValue = stringValue;
 	}
 
-	public void tokenizeInstances() {
-		// loop through inputInstances
-		for (int i = 0; i < inputInstances.numInstances(); i++) {
-			// loop through instance attributes
-			for (int x = 0; x < inputInstances.instance(i).numAttributes(); x++) {
-				Instance inputInstance = inputInstances.instance(i);
-				tokenList.addAll(postagger.runPOSTagger(inputInstance
-						.stringValue(x)));
+	/**
+	 * @return the filtered words
+	 */
+	public ArrayList<String> getFilteredwords() {
+		return filteredwords;
+	}
+
+	/**
+	 * @param filteredwords
+	 *            the filtered words to set
+	 */
+	public void setFilteredwords(ArrayList<String> filteredwords) {
+		this.filteredwords = filteredwords;
+	}
+
+	private void POSTagerTokenizeInstances() {
+		if (!inputInstances.equals(null) || inputInstances.numInstances() != 0) {
+
+			// loop through inputInstances
+			for (int i = 0; i < inputInstances.numInstances(); i++) {
+				// loop through instance attributes
+				for (int x = 0; x < inputInstances.instance(i).numAttributes(); x++) {
+					Instance inputInstance = inputInstances.instance(i);
+					// inputInstance.attribute(4).value(arg0)
+
+					tokenList.addAll(postagger.runPOSTagger(inputInstance
+							.stringValue(x).toLowerCase()));
+				}
 			}
 		}
 	}
 
-	public void tokenizeStringValue() {
+	private void POSTagerTokenizeStringValue() {
 		tokenList.addAll(postagger.runPOSTagger(stringValue));
 	}
 
-	public void createFilteredTokensSet() {
-		// loop through selected attribute token data
-		for (Token token : tokenList) {
-			switch (token.getPOS()) {
-			case "A":
-			case "V":
-			case "R":
-			case "#":
-				String word = token.getWord();
-				System.out.println("choose by filter v : "+word);
-				if (!filteredTokens.contains(word)) {
-					System.out.println("add to filteredTokens : "+word);
-					filteredTokens.add(word);
-				}
-
-			}
-		}
-	}
-
-	public ArrayList<String> getFilteredTokens() {
-
+	private void createFilteredTokens() {
 		// loop through selected attribute token data
 		for (Token token : tokenList) {
 			switch (token.getPOS()) {
@@ -130,14 +120,65 @@ public class Preprocessing {
 			case "^":
 			case "N":
 				String word = token.getWord().replaceAll("#", "");
-				System.out.println("choose by filter : "+word);
-				if (!filteredTokens.contains(word)) {
-					System.out.println("add to filteredTokens : "+word);
-					filteredTokens.add(word);
+				if (!filteredWTokenSet.contains(word)) {
+					filteredWTokenSet.add(word);
 				}
 			}
 		}
-		return filteredTokens;
+		System.out.println("filteredWTokenSet : "
+				+ filteredWTokenSet.toString());
+	}
+
+	private void applayPorterStemmer() {
+		PorterStemmer stemmer = new PorterStemmer();
+		for (int i = 0; i < filteredWTokenSet.size(); i++) {
+			// System.out.println("befor stemme :"+filteredWTokenSet.get(i));
+			stemmer.setCurrent(filteredWTokenSet.get(i));
+			if (stemmer.stem()) {
+				// If stemming is successful obtain the stem of the given word
+				String w = stemmer.getCurrent();
+				if (!filteredwords.contains(w)) {
+					filteredwords.add(w);
+
+				}
+			}
+		}
+		System.out.println("filteredwords : " + filteredwords.toString());
+		System.out
+				.println("----------------------------------------------------------------------");
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public ArrayList<String> getFilteredWTokenSet() {
+		// loop through selected attribute token data
+		for (Token token : tokenList) {
+			switch (token.getPOS()) {
+			case "A":
+			case "R":
+			case "#":
+			case "^":
+			case "N":
+				String word = token.getWord();
+				if (featureWords.contains(word)
+						&& !filteredWTokenSet.contains(word)) {
+					filteredWTokenSet.add(word);
+				}
+			}
+		}
+		return filteredWTokenSet;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -146,7 +187,7 @@ public class Preprocessing {
 
 		System.out.println("database f words :" + featureWords.toString());
 		System.out.println("f words set filtered using database f words :"
-				+ filteredTokens.toString());
+				+ filteredWTokenSet.toString());
 
 		ArrayList<String> selectedKeySet = new ArrayList<String>();
 
@@ -157,7 +198,7 @@ public class Preprocessing {
 
 			System.out.println("ads map data : " + list.toString());
 
-			for (String filteredW : filteredTokens) {
+			for (String filteredW : filteredWTokenSet) {
 				if (list.contains(filteredW)
 						&& !selectedKeySet.contains(mapEntry.getKey())) {
 					System.out.println("map word: " + filteredW);
