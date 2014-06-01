@@ -1,5 +1,6 @@
 package com.contentanalyzer.springservice.domain;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import com.contentanalyzer.springservice.dao.MysqlConnection;
 
 import snowballstemmer.PorterStemmer;
 import weka.core.Instance;
@@ -20,8 +23,7 @@ import cmu.arktweetnlp.Token;
  * @Desc for do all Preprocessing operations
  * */
 public class Preprocessing {
-	
-	public static int x=0;
+
 	/**
 	 * Instances to be indexed.
 	 */
@@ -36,31 +38,39 @@ public class Preprocessing {
 	 * contains feature words
 	 */
 	private ArrayList<String> featureWords;
+	public static HashMap<String, Integer> newFeatureWords = new HashMap<String, Integer>();
+	private HashMap<String, Integer> weightedWords = new HashMap<String, Integer>();
 
-	private ArrayList<String> filteredWTokenSet = new ArrayList<String>();
-	private ArrayList<String> filteredwords = new ArrayList<String>();
+	private HashMap<String, Integer> filteredWTokenSet = new HashMap<String, Integer>();
+	private HashMap<String, Integer> filteredwords = new HashMap<String, Integer>();
 	private POSTagger postagger = new POSTagger();
 	private List<Token> tokenList = new ArrayList<Token>();
-
+	
+	private int D;
+	
+	
 	public Preprocessing() {
 
 	}
 
-	public Preprocessing(String searchString, ArrayList<String> featureWords) {
+	public Preprocessing(String searchString, ArrayList<String> featureWords, int D) {
 		this.stringValue = searchString;
 		this.featureWords = featureWords;
 		this.POSTagerTokenizeStringValue();
 		this.createFilteredTokens();
 		this.applayPorterStemmer();
+		this.D = D;
 	}
 
 	public Preprocessing(Instances inputInstances,
-			ArrayList<String> featureWords) {
+			ArrayList<String> featureWords, int D) throws SQLException {
 		this.inputInstances = inputInstances;
 		this.featureWords = featureWords;
 		this.POSTagerTokenizeInstances();
 		this.createFilteredTokens();
 		this.applayPorterStemmer();
+		this.D = D;
+		this.setWeight();
 
 		// join with featurewords
 		// make weight for filtered word set
@@ -74,21 +84,15 @@ public class Preprocessing {
 		this.stringValue = stringValue;
 	}
 
-	/**
-	 * @return the filtered words
-	 */
-	public ArrayList<String> getFilteredwords() {
-		return filteredwords;
+
+	public HashMap<String, Integer> getWeightedWords() {
+		return weightedWords;
 	}
 
-	/**
-	 * @param filteredwords
-	 *            the filtered words to set
-	 */
-	public void setFilteredwords(ArrayList<String> filteredwords) {
-		this.filteredwords = filteredwords;
+	public void setWeightedWords(HashMap<String, Integer> weightedWords) {
+		this.weightedWords = weightedWords;
 	}
-
+	
 	private void POSTagerTokenizeInstances() {
 		if (!inputInstances.equals(null) || inputInstances.numInstances() != 0) {
 
@@ -98,7 +102,6 @@ public class Preprocessing {
 				for (int x = 0; x < inputInstances.instance(i).numAttributes(); x++) {
 					Instance inputInstance = inputInstances.instance(i);
 					// inputInstance.attribute(4).value(arg0)
-
 					tokenList.addAll(postagger.runPOSTagger(inputInstance
 							.stringValue(x).toLowerCase()));
 				}
@@ -120,92 +123,86 @@ public class Preprocessing {
 			case "^":
 			case "N":
 				String word = token.getWord().replaceAll("#", "");
-				if (!filteredWTokenSet.contains(word)) {
-					filteredWTokenSet.add(word);
+				if(filteredWTokenSet.containsKey(word)){
+					//update map entry
+					filteredWTokenSet.put(word, filteredWTokenSet.get(word) + 1);
+				}else{
+					//add new map entry
+					filteredWTokenSet.put(word, 1);
 				}
 			}
 		}
 		System.out.println("filteredWTokenSet : "
 				+ filteredWTokenSet.toString());
 	}
-
+	
 	private void applayPorterStemmer() {
 		PorterStemmer stemmer = new PorterStemmer();
-		for (int i = 0; i < filteredWTokenSet.size(); i++) {
-			// System.out.println("befor stemme :"+filteredWTokenSet.get(i));
-			stemmer.setCurrent(filteredWTokenSet.get(i));
-			if (stemmer.stem()) {
+		for (Map.Entry<String, Integer> entry : filteredWTokenSet.entrySet()) {
+			stemmer.setCurrent(entry.getKey());
+			if(stemmer.stem()){
 				// If stemming is successful obtain the stem of the given word
-				String w = stemmer.getCurrent();
-				if (!filteredwords.contains(w)) {
-					filteredwords.add(w);
-
+				String word = stemmer.getCurrent();
+				if(filteredwords.containsKey(word)){
+					filteredwords.put(word, filteredwords.get(word) + entry.getValue());
+				}else{
+					filteredwords.put(word, entry.getValue());
 				}
 			}
 		}
 		System.out.println("filteredwords : " + filteredwords.toString());
-		System.out
-				.println("----------------------------------------------------------------------");
+		
 	}
 
 	
+	private void setWeight() throws SQLException {
+		
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public ArrayList<String> getFilteredWTokenSet() {
-		// loop through selected attribute token data
-		for (Token token : tokenList) {
-			switch (token.getPOS()) {
-			case "A":
-			case "R":
-			case "#":
-			case "^":
-			case "N":
-				String word = token.getWord();
-				if (featureWords.contains(word)
-						&& !filteredWTokenSet.contains(word)) {
-					filteredWTokenSet.add(word);
+		for (Map.Entry<String, Integer> entry : filteredwords.entrySet()) {
+			
+			// check w in featureWords
+			if(featureWords.contains(entry.getKey())){
+				// do weight
+				int TF = entry.getValue();
+				int DF = MysqlConnection.getDbConnection().getLikeCount(entry.getKey());
+				int A = (int) (TF * Math.log((10/DF)));/**************************************/
+				// put into weightedWords
+				weightedWords.put(entry.getKey(), A);
+				
+			}else if(!featureWords.contains(entry.getKey())){
+				// check w in newFeatureWords
+				if(newFeatureWords.containsKey(entry.getKey())){//.contains(entry.getKey())){
+					
+					newFeatureWords.put(entry.getKey(), newFeatureWords.get(entry.getKey()) + 1);
+					
+					int TF = entry.getValue();
+					int DF = newFeatureWords.get(entry.getKey());//MysqlConnection.getDbConnection().getLikeCount(entry.getKey());
+					//System.out.println("D:10  DF: "+DF+" TF: "+TF);
+					int A = (int) (TF * Math.log((10/DF)));/***********************/
+					System.out.println("entry.getKey() : "+entry.getKey()+ " D:10  DF: "+DF+" TF: "+TF+" A: "+A);
+					// put into weightedWords
+					weightedWords.put(entry.getKey(), A);
+				}else{
+					// add w into newFeatureWords
+					newFeatureWords.put(entry.getKey(),1);
+					// do weight(0)
+					// add into weightedWords
+					weightedWords.put(entry.getKey(), 0);
 				}
 			}
 		}
-		return filteredWTokenSet;
+		
+		
+		
+		
+		
+
+		System.out.println("weightedWords set : "+weightedWords.toString());
+		System.out.println("----------------------------------------------------------------------");
+
 	}
+	
+	
+	
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ArrayList<String> mapFilteredTokens(
-			Map<String, ArrayList<String>> adsMap) {
-
-		System.out.println("database f words :" + featureWords.toString());
-		System.out.println("f words set filtered using database f words :"
-				+ filteredWTokenSet.toString());
-
-		ArrayList<String> selectedKeySet = new ArrayList<String>();
-
-		Iterator iterator = adsMap.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry mapEntry = (Map.Entry) iterator.next();
-			ArrayList<String> list = (ArrayList<String>) mapEntry.getValue();
-
-			System.out.println("ads map data : " + list.toString());
-
-			for (String filteredW : filteredWTokenSet) {
-				if (list.contains(filteredW)
-						&& !selectedKeySet.contains(mapEntry.getKey())) {
-					System.out.println("map word: " + filteredW);
-					selectedKeySet.add(mapEntry.getKey().toString());
-				}
-			}
-		}
-		return selectedKeySet;
-	}
 }

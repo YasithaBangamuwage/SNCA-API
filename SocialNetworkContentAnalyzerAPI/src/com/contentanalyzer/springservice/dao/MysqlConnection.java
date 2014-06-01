@@ -69,6 +69,7 @@ public class MysqlConnection {
 	public int insert(String insertQuery) throws SQLException {
 		statement = db.conn.createStatement();
 		int result = statement.executeUpdate(insertQuery);
+		System.out.println(result);
 		return result;
 	}
 
@@ -82,5 +83,28 @@ public class MysqlConnection {
 		statement = db.conn.createStatement();
 		int result = statement.executeUpdate(updateQuery);
 		return result;
+	}
+
+	public int getLikeCount(String word) throws SQLException {
+		statement = db.conn.createStatement();
+		res = statement
+				.executeQuery("SELECT COUNT(*) FROM filtered_feeds WHERE filtered_feed LIKE '%"
+						+ word + "%';");
+		if (res.next()) {
+			return res.getInt(1);
+		} else {
+			return 0;
+		}
+	}
+
+	public int getTrainingDataCount() throws SQLException {
+		statement = db.conn.createStatement();
+		res = statement
+				.executeQuery("SELECT filtered_id, filtered_feed, classified_ads FROM filtered_feeds WHERE classified_ads IS NOT NULL;");
+		if (res.next()) {
+			return res.getInt(1);
+		} else {
+			return 0;
+		}
 	}
 }

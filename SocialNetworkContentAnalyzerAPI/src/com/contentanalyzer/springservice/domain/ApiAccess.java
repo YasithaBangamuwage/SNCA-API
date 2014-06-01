@@ -49,13 +49,14 @@ public class ApiAccess {
 	public void doPreprocessing(String id, String searchString) throws SQLException {
 		
 		if(!id.equals("") && !searchString.equals("")){
+			int D = MysqlConnection.getDbConnection().getTrainingDataCount();
 			ArrayList<String> featureWordSet = getFatureWordSet();
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			//get current date time with Date()
 			String date = dateFormat.format(new Date());
 			
 			// run the preprocessing using SN data
-			Preprocessing preprocessing = new Preprocessing(searchString, featureWordSet);
+			Preprocessing preprocessing = new Preprocessing(searchString, featureWordSet, D);
 			//put preprocessing object
 			
 			
@@ -81,14 +82,13 @@ public class ApiAccess {
 									+ id + " order by feed_date;");
 			dummayInstancesObj.delete();
 			Instances filterdInstances = new Instances(dummayInstancesObj, 0) ;
+			int D = MysqlConnection.getDbConnection().getTrainingDataCount();
 			int count = datbaseInput.numInstances();
 			int temp = 0;
-			Instance current = null ;
+			Instance current ;
 			Instance next;
 			
 			for (int i = 0; i < count; i++) {
-				Preprocessing.x ++;
-				System.out.println("x is : "+Preprocessing.x);
 				 current = datbaseInput.instance(i);
 				temp++;
 				if(temp==count){
@@ -102,9 +102,13 @@ public class ApiAccess {
 				} else {
 					// run the preprocessing using SN data
 					Preprocessing preprocessing = new Preprocessing(filterdInstances,
-							featureWordSet);
+							featureWordSet, D);
 					//put preprocessing object
 					preProcsObjectSet.put(current.stringValue(5), preprocessing);
+					//add new filtered data into database
+					updateFilteredFeeds(id);
+					//add new feature words into database
+					updateFeatureWords();
 					// get outputs from the preprocessing
 					filterdInstances.delete();
 					// add new date status to continue the loop
@@ -112,9 +116,13 @@ public class ApiAccess {
 				}
 			}
 			Preprocessing preprocessing = new Preprocessing(filterdInstances,
-					featureWordSet);
+					featureWordSet, D);
 			//put preprocessing object
-			preProcsObjectSet.put(current.stringValue(5), preprocessing);
+			preProcsObjectSet.put("2014-05-03", preprocessing);//current.stringValue(5)
+			//add new filtered data into database
+			updateFilteredFeeds(id);
+			//add new feature words into database
+			updateFeatureWords();
 			System.out.println(preProcsObjectSet.toString());
 			
 		}
@@ -126,5 +134,33 @@ public class ApiAccess {
 		else {
 			System.out.println("Unsuccessful request");
 		}
+	}
+	
+	private void updateFilteredFeeds(String id) throws SQLException{
+		
+		for (Map.Entry<String, Preprocessing> entry : preProcsObjectSet.entrySet()) {
+			
+			String stringData = "";
+			for (Map.Entry<String, Integer> insideEntry : entry.getValue().getWeightedWords().entrySet()) {
+				stringData = stringData + insideEntry.getKey() + ":" + insideEntry.getValue() + ",";
+			}
+		//	stringData.substring(0, stringData.length()-1);
+			String s = stringData.replaceAll("[',:]*", "");
+			System.out.println("sssssss:   "+s);
+			System.out.println("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"')");
+			MysqlConnection.getDbConnection().insert("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"');");
+			
+		}
+	 
+		
+	}
+	
+	private void updateFeatureWords() throws SQLException{
+		
+		HashMap<String, Integer> newSet = Preprocessing.newFeatureWords;
+		for (Map.Entry<String, Integer> insideEntry : newSet.entrySet()) {
+			MysqlConnection.getDbConnection().insert("INSERT INTO feature_words VALUES ("+insideEntry.getKey()+");");
+		}
+		Preprocessing.newFeatureWords.clear();
 	}
 }
