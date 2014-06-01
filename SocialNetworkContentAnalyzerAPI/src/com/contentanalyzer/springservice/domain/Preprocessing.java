@@ -117,19 +117,11 @@ public class Preprocessing {
 			case "A":
 			case "R":
 			case "#":
-<<<<<<< HEAD
 			case "^":
 			case "N":
 				String word = token.getWord().replaceAll("#", "");
 				if (!filteredWTokenSet.contains(word)) {
 					filteredWTokenSet.add(word);
-=======
-				String word = token.getWord();
-				System.out.println("choose by filter v: "+word);
-				if (!filteredTokens.contains(word)) {
-					System.out.println("add to filteredTokens : "+word);
-					filteredTokens.add(word);
->>>>>>> d8f305a0c5f29cc365d7fae20c69a553dbcbc2ce
 				}
 			}
 		}
