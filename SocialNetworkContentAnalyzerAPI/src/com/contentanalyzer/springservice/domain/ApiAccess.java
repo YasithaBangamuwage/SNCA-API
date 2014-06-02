@@ -121,6 +121,9 @@ public class ApiAccess {
 			updateFeatureWords();
 			System.out.println(preProcsObjectSet.toString());
 			
+			//delete social_feeds data
+			MysqlConnection.getDbConnection().delete("DELETE FROM social_feeds WHERE user_id="+id+"");
+			
 		}
 		// preprocessing already done for requested user
 		else if (!userExists(id)) {
@@ -143,8 +146,9 @@ public class ApiAccess {
 		//	stringData.substring(0, stringData.length()-1);
 			String s = stringData.replaceAll("[']*", "");
 			s = s.substring(0, stringData.length()-1);
-			System.out.println("sssssss:   "+s);
-			System.out.println("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"')");
+			//System.out.println("sssssss:   "+s);
+			System.out.println(entry.getKey() +" => "+s);
+			//System.out.println("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"')");
 			MysqlConnection.getDbConnection().insert("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"');");
 			
 		}
