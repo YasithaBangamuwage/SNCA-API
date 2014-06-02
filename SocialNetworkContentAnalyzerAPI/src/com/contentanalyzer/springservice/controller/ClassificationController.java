@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,9 +18,10 @@ import com.contentanalyzer.springservice.domain.test;
 @RestController
 @RequestMapping("/classification")
 public class ClassificationController {
+	
 
-	@RequestMapping(value = "/smo/adnotnull", method = RequestMethod.GET, headers = "Accept=application/json")
-	public AdvertisementCategory training() throws Exception {
+	@RequestMapping(value = "/smo/adnotnull/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
+	public AdvertisementCategory training(@PathVariable int id) throws Exception {
 		
 		AdvertisementCategory ac = new AdvertisementCategory();
 		ArrayList<String> PredictedList = new ArrayList<String>();
@@ -28,7 +30,7 @@ public class ClassificationController {
 				.connect().getQueryData(
 						"select filtered_id, filtered_feed, classified_ads from filtered_feeds where classified_ads is not null;"),
 				WekaInstances.connect().getQueryData(
-						"select filtered_id, filtered_feed, classified_ads from filtered_feeds where classified_ads is null;"));
+						"select filtered_id, filtered_feed, classified_ads from filtered_feeds where classified_ads is null and user_id="+id+";"));
 		classification.trainClassifier();
 		classification.testClassifier();
 		Map map = classification.getClassifiedAds();

@@ -60,7 +60,7 @@ public class Classification {
 			labeled.instance(i).setClassValue(clsLabel);
 			//System.out.println(labeled.instance(i).classValue());	
 			Instance ins = testingData.instance(i);
-			System.out.println("Id : "+ins.value(0));
+			//System.out.println("Id : "+ins.value(0));
 			System.out.println("Class predicted: " + trainingData.classAttribute().value((int) clsLabel));
 			classifiedAds.put((int)ins.value(0), trainingData.classAttribute().value((int) clsLabel));
 			//xxxx = trainingData.classAttribute().value((int) clsLabel);
