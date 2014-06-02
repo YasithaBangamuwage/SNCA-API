@@ -85,7 +85,7 @@ public class ApiAccess {
 			int D = MysqlConnection.getDbConnection().getTrainingDataCount();
 			int count = datbaseInput.numInstances();
 			int temp = 0;
-			Instance current ;
+			Instance current = null ;
 			Instance next;
 			
 			for (int i = 0; i < count; i++) {
@@ -105,10 +105,6 @@ public class ApiAccess {
 							featureWordSet, D);
 					//put preprocessing object
 					preProcsObjectSet.put(current.stringValue(5), preprocessing);
-					//add new filtered data into database
-					updateFilteredFeeds(id);
-					//add new feature words into database
-					updateFeatureWords();
 					// get outputs from the preprocessing
 					filterdInstances.delete();
 					// add new date status to continue the loop
@@ -118,7 +114,7 @@ public class ApiAccess {
 			Preprocessing preprocessing = new Preprocessing(filterdInstances,
 					featureWordSet, D);
 			//put preprocessing object
-			preProcsObjectSet.put("2014-05-03", preprocessing);//current.stringValue(5)
+			preProcsObjectSet.put(current.stringValue(5), preprocessing);//current.stringValue(5)
 			//add new filtered data into database
 			updateFilteredFeeds(id);
 			//add new feature words into database
@@ -145,7 +141,8 @@ public class ApiAccess {
 				stringData = stringData + insideEntry.getKey() + ":" + insideEntry.getValue() + ",";
 			}
 		//	stringData.substring(0, stringData.length()-1);
-			String s = stringData.replaceAll("[',:]*", "");
+			String s = stringData.replaceAll("[']*", "");
+			s = s.substring(0, stringData.length()-1);
 			System.out.println("sssssss:   "+s);
 			System.out.println("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"')");
 			MysqlConnection.getDbConnection().insert("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"');");

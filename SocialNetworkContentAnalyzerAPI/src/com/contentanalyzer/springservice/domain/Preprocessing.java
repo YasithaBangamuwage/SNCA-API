@@ -99,8 +99,9 @@ public class Preprocessing {
 			// loop through inputInstances
 			for (int i = 0; i < inputInstances.numInstances(); i++) {
 				// loop through instance attributes
-				for (int x = 0; x < inputInstances.instance(i).numAttributes(); x++) {
+				for (int x = 0; x < inputInstances.instance(i).numAttributes()-1; x++) {
 					Instance inputInstance = inputInstances.instance(i);
+					//System.out.println("x : "+x+"---------"+inputInstance.stringValue(x).toLowerCase());
 					// inputInstance.attribute(4).value(arg0)
 					tokenList.addAll(postagger.runPOSTagger(inputInstance
 							.stringValue(x).toLowerCase()));
@@ -116,6 +117,7 @@ public class Preprocessing {
 	private void createFilteredTokens() {
 		// loop through selected attribute token data
 		for (Token token : tokenList) {
+			
 			switch (token.getPOS()) {
 			case "A":
 			case "R":
@@ -123,6 +125,7 @@ public class Preprocessing {
 			case "^":
 			case "N":
 				String word = token.getWord().replaceAll("#", "");
+				System.out.println(token.getPOS() +" : "+token.getWord());
 				if(filteredWTokenSet.containsKey(word)){
 					//update map entry
 					filteredWTokenSet.put(word, filteredWTokenSet.get(word) + 1);

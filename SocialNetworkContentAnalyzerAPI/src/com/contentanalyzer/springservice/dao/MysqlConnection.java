@@ -69,7 +69,6 @@ public class MysqlConnection {
 	public int insert(String insertQuery) throws SQLException {
 		statement = db.conn.createStatement();
 		int result = statement.executeUpdate(insertQuery);
-		System.out.println(result);
 		return result;
 	}
 
