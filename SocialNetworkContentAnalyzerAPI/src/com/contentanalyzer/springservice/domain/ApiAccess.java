@@ -35,31 +35,16 @@ public class ApiAccess {
 
 	}
 
-	private ArrayList<String> getFatureWordSet() throws SQLException {
-		// get feature words list
-		ResultSet res = MysqlConnection.getDbConnection().getQueryData(
-				"SELECT * FROM Feature_Words;");
-		ArrayList<String> featureWordSet = new ArrayList<String>();
-		while (res.next()) {
-			featureWordSet.add(res.getString(1));
-		}
-		return featureWordSet;
-	}
-
 	public void doPreprocessing(String id, String searchString) throws SQLException {
 		
 		if(!id.equals("") && !searchString.equals("")){
-			int D = MysqlConnection.getDbConnection().getTrainingDataCount();
-			ArrayList<String> featureWordSet = getFatureWordSet();
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			//get current date time with Date()
 			String date = dateFormat.format(new Date());
 			
 			// run the preprocessing using SN data
-			Preprocessing preprocessing = new Preprocessing(searchString, featureWordSet, D);
+			Preprocessing preprocessing = new Preprocessing(searchString);
 			//put preprocessing object
-			
-			
 			preProcsObjectSet.put(date, preprocessing);
 		}else{
 			System.out.println("invalid request");
@@ -70,7 +55,6 @@ public class ApiAccess {
 
 		// preprocessing with SN data and searchString
 		if (userExists(id)) {
-			ArrayList<String> featureWordSet = getFatureWordSet();
 			// get latest SN data group by date
 			Instances datbaseInput = WekaInstances
 					.connect()
@@ -82,7 +66,6 @@ public class ApiAccess {
 									+ id + " order by feed_date;");
 			dummayInstancesObj.delete();
 			Instances filterdInstances = new Instances(dummayInstancesObj, 0) ;
-			int D = MysqlConnection.getDbConnection().getTrainingDataCount();
 			int count = datbaseInput.numInstances();
 			int temp = 0;
 			Instance current = null ;
@@ -101,8 +84,7 @@ public class ApiAccess {
 					filterdInstances.add(current);
 				} else {
 					// run the preprocessing using SN data
-					Preprocessing preprocessing = new Preprocessing(filterdInstances,
-							featureWordSet, D);
+					Preprocessing preprocessing = new Preprocessing(filterdInstances);
 					//put preprocessing object
 					preProcsObjectSet.put(current.stringValue(5), preprocessing);
 					// get outputs from the preprocessing
@@ -111,16 +93,11 @@ public class ApiAccess {
 					filterdInstances.add(current);
 				}
 			}
-			Preprocessing preprocessing = new Preprocessing(filterdInstances,
-					featureWordSet, D);
+			Preprocessing preprocessing = new Preprocessing(filterdInstances);
 			//put preprocessing object
 			preProcsObjectSet.put(current.stringValue(5), preprocessing);//current.stringValue(5)
 			//add new filtered data into database
 			updateFilteredFeeds(id);
-			//add new feature words into database
-			updateFeatureWords();
-			System.out.println(preProcsObjectSet.toString());
-			
 			//delete social_feeds data
 			MysqlConnection.getDbConnection().delete("DELETE FROM social_feeds WHERE user_id="+id+"");
 			
@@ -140,28 +117,14 @@ public class ApiAccess {
 		for (Map.Entry<String, Preprocessing> entry : preProcsObjectSet.entrySet()) {
 			
 			String stringData = "";
-			for (Map.Entry<String, Integer> insideEntry : entry.getValue().getWeightedWords().entrySet()) {
+			for (Map.Entry<String, Integer> insideEntry : entry.getValue().getFilteredwords().entrySet()) {
 				stringData = stringData + insideEntry.getKey() + ":" + insideEntry.getValue() + ",";
 			}
-		//	stringData.substring(0, stringData.length()-1);
-			String s = stringData.replaceAll("[']*", "");
-			s = s.substring(0, stringData.length()-1);
-			//System.out.println("sssssss:   "+s);
-			System.out.println(entry.getKey() +" => "+s);
-			//System.out.println("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"')");
-			MysqlConnection.getDbConnection().insert("INSERT INTO filtered_feeds(user_id, date, filtered_feed) VALUES("+id+", '"+entry.getKey()+"', '"+s+"');");
 			
+			String vectorData = stringData.replaceAll("[']*", "");
+			vectorData = vectorData.substring(0, stringData.length()-1);
+			System.out.println(entry.getKey() +" => "+vectorData);
+			MysqlConnection.getDbConnection().setWeightMethod01(Integer.parseInt(id), vectorData, entry.getValue().getFilteredwords().size(), entry.getKey());
 		}
-	 
-		
-	}
-	
-	private void updateFeatureWords() throws SQLException{
-		
-		HashMap<String, Integer> newSet = Preprocessing.newFeatureWords;
-		for (Map.Entry<String, Integer> insideEntry : newSet.entrySet()) {
-			MysqlConnection.getDbConnection().insert("INSERT INTO feature_words VALUES ("+insideEntry.getKey()+");");
-		}
-		Preprocessing.newFeatureWords.clear();
 	}
 }

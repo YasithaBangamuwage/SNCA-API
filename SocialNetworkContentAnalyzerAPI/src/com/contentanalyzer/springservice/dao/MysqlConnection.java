@@ -106,4 +106,19 @@ public class MysqlConnection {
 			return 0;
 		}
 	}
+	
+	public void setWeightMethod01(int id, String vectorData, int count, String date) throws SQLException{
+		 // Call a procedure with no parameters
+	    CallableStatement cs = db.conn.prepareCall("{call define_weight_method01(?, ?, ?, ?)}");
+	    // Set the value for the IN parameter
+	    cs.setInt(1, id);
+	    cs.setString(2, vectorData);
+	    cs.setInt(3, count);
+	    cs.setString(4, date);
+	    cs.execute();
+	}
 }
+
+
+
+
