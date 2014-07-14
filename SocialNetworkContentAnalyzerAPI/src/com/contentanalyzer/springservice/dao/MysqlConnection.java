@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.mysql.jdbc.Connection;
+
 import java.sql.*;
 
 /**
@@ -19,11 +20,11 @@ public class MysqlConnection {
 	// JDBC driver name and database URL
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 	static final String DB_URL = "jdbc:mysql://localhost:3306/";
-	static final String DATABASE = "wekadb";
+	static final String DATABASE ="cdap";// "wekadb";//cdap
 
 	// Database credentials
-	static final String USER = "root";
-	static final String PASSWORD = "abc123";
+	static final String USER = "cdap_user";//"cdap_user";//"root";//cdap_user
+	static final String PASSWORD = "cdap_pwd";//"abc123";//cdap_pwd
 
 	public Connection conn;
 	private Statement statement;
@@ -109,6 +110,9 @@ public class MysqlConnection {
 	
 	public void setWeightMethod01(int id, String vectorData, int count, String date) throws SQLException{
 		 // Call a procedure with no parameters
+		System.out.println("(id):"+id+"| vectorData: "+vectorData+" |count: "+count+"| date: "+date);
+
+		
 	    CallableStatement cs = db.conn.prepareCall("{call define_weight_method01(?, ?, ?, ?)}");
 	    // Set the value for the IN parameter
 	    cs.setInt(1, id);
