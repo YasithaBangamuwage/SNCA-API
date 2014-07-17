@@ -13,10 +13,9 @@ public class JsonMessage {
 
 	String msg;
 	String status;
-
-
 	String userId;
 	private ArrayList<String> CategoryList;
+	String CategoryListString;
 
 	public JsonMessage() {
 		super();
@@ -54,6 +53,18 @@ public class JsonMessage {
 
 	public void setCategoryList(ArrayList<String> categoryList) {
 		CategoryList = categoryList;
+	}
+	
+	public String CategoryListToJson(){
+		
+		CategoryListString = "{";
+		for (int i = 0; i < CategoryList.size(); i++) {
+			CategoryListString = CategoryListString + i +":"+"\""+CategoryList.get(i)+"\",";
+		}
+		CategoryListString = CategoryListString.substring(0, CategoryListString.length() - 1);
+		CategoryListString = CategoryListString + "}";
+		
+		return CategoryListString;
 	}
 	
 	@Override

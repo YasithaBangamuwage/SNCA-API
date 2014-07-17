@@ -37,7 +37,6 @@ public class WekaInstances {
 
 	public Instances getQueryData(String queryString) throws Exception {
 		query.setQuery(queryString);
-		System.out.println(query.retrieveInstances().toString());
 		return query.retrieveInstances();
 	}
 }

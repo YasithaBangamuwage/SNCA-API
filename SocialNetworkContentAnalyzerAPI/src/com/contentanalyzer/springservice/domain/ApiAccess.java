@@ -30,17 +30,15 @@ public class ApiAccess {
 	}
 
 	private boolean userExists(String id) throws SQLException {
-		return MysqlConnection
-				.getDbConnection()
-				.isExistData(
-						"SELECT social_feeds.user_id FROM social_feeds WHERE social_feeds.user_id ="
-								+ id + ";");
+		return MysqlConnection.getDbConnection().isExistData(
+				"SELECT social_feeds.user_id FROM social_feeds WHERE social_feeds.user_id ="
+						+ id + ";");
 
 	}
 
 	public JsonMessage doPreprocessing(String id, String searchString)
 			throws Exception {
-		
+
 		if (!id.equals("") && !searchString.equals("")) {
 
 			try {
@@ -155,6 +153,7 @@ public class ApiAccess {
 				return jm;
 
 			}
+
 		}
 		// preprocessing already done for requested user
 		else if (!userExists(id)) {
@@ -184,13 +183,19 @@ public class ApiAccess {
 						+ insideEntry.getValue() + ",";
 			}
 
-			String vectorData = stringData.replaceAll("[']*", "");
-			vectorData = vectorData.substring(0, stringData.length() - 1);
-			System.out.println(entry.getKey() + " => " + vectorData);
-			
-			MysqlConnection.getDbConnection().setWeightMethod01(
-					Integer.parseInt(id), vectorData,
-					entry.getValue().getFilteredwords().size(), entry.getKey());
+			if (stringData.length() != 0) {
+
+				String vectorData = stringData.replaceAll("[']*", "");
+				String newVectorString = vectorData.substring(0,
+						vectorData.length() - 1);
+
+				System.out.println(entry.getKey() + " => " + newVectorString);
+
+				MysqlConnection.getDbConnection().setWeightMethod01(
+						Integer.parseInt(id), newVectorString,
+						entry.getValue().getFilteredwords().size(),
+						entry.getKey());
+			}
 		}
 	}
 

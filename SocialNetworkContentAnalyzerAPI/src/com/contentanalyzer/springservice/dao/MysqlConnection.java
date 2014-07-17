@@ -110,9 +110,6 @@ public class MysqlConnection {
 	
 	public void setWeightMethod01(int id, String vectorData, int count, String date) throws SQLException{
 		 // Call a procedure with no parameters
-		System.out.println("(id):"+id+"| vectorData: "+vectorData+" |count: "+count+"| date: "+date);
-
-		
 	    CallableStatement cs = db.conn.prepareCall("{call define_weight_method01(?, ?, ?, ?)}");
 	    // Set the value for the IN parameter
 	    cs.setInt(1, id);
