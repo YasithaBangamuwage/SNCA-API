@@ -1,23 +1,9 @@
 package com.contentanalyzer.springservice.controller;
 
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import weka.core.Instances;
-
-import com.contentanalyzer.springservice.dao.MysqlConnection;
-import com.contentanalyzer.springservice.dao.WekaInstances;
-import com.contentanalyzer.springservice.domain.JsonMessage;
-import com.contentanalyzer.springservice.domain.Preprocessing;
 import com.contentanalyzer.springservice.domain.*;
 
 /**
@@ -54,7 +40,6 @@ public class PreprocessingController {
 			@PathVariable String searchString) throws Exception {
 
 		ApiAccess api = new ApiAccess();
-		api.doPreprocessing(searchString.replaceAll("[-+^,']*", ""), id.replaceAll("[-+^,']*", ""));
-		
+		api.doPreprocessing( id.replaceAll("[-+^,']*", ""), searchString.replaceAll("[-+^,']*", ""));
 	}
 }

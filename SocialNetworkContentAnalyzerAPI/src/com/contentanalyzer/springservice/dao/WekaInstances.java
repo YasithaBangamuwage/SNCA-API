@@ -15,16 +15,16 @@ public class WekaInstances {
 	public static WekaInstances mysqlWeka;
 	private static InstanceQuery query;
 	// Database credentials
-	static final String USER = "root";
-	static final String PASSWORD = "abc123";
+	static final String USER = "cdap_user";
+	static final String PASSWORD = "cdap_pwd";
 
 	private WekaInstances() throws Exception {
 		query = new InstanceQuery();
 		query.setUsername(USER);
 		query.setPassword(PASSWORD);
 
-		query.setUsername("root");
-		query.setPassword("abc123");
+		query.setUsername(USER);
+		query.setPassword(PASSWORD);
 
 	}
 
