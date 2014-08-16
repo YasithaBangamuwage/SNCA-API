@@ -37,8 +37,7 @@ public class ClassificationController {
 		Iterator iterator = (Iterator) map.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Map.Entry mapEntry = (Map.Entry) ((java.util.Iterator) iterator).next();
-			System.out.println("The key is: " + mapEntry.getKey()
-				+ ",value is :" + mapEntry.getValue());
+			//System.out.println("The key is: " + mapEntry.getKey()+ ",value is :" + mapEntry.getValue());
 			PredictedList.add(mapEntry.getValue().toString());
 			String insertAd = "update filtered_feeds set classified_ads = '"+mapEntry.getValue()+"' where filtered_id = "+mapEntry.getKey()+";";
 			//System.out.println(insertAd);

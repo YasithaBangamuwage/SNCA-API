@@ -46,8 +46,8 @@ public class Classification {
 		smo.turnChecksOn();
 		Evaluation eTest = new Evaluation(trainingData); 
         eTest.evaluateModel(smo,trainingData); 
-        //System.out.println(eTest.toSummaryString());
-        //System.out.println(smo.toString());
+        System.out.println(eTest.toSummaryString());
+        System.out.println(smo.toString());
 	}
 
 	public void testClassifier() throws Exception {
@@ -61,13 +61,13 @@ public class Classification {
 			//System.out.println(labeled.instance(i).classValue());	
 			Instance ins = testingData.instance(i);
 			//System.out.println("Id : "+ins.value(0));
-			System.out.println("Class predicted: " + trainingData.classAttribute().value((int) clsLabel));
+			System.out.println("Class predicted for: " +ins.value(1)+ " is " + trainingData.classAttribute().value((int) clsLabel));
 			classifiedAds.put((int)ins.value(0), trainingData.classAttribute().value((int) clsLabel));
 			//xxxx = trainingData.classAttribute().value((int) clsLabel);
 		}
-		System.out.println(classifiedAds.toString());
+		//System.out.println(classifiedAds.toString());
 		Evaluation eTest = new Evaluation(testingData); 
         eTest.evaluateModel(smo,testingData); 
-        System.out.println(eTest.toSummaryString());
+        //System.out.println(eTest.toSummaryString());
 	}
 }
