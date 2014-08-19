@@ -16,6 +16,15 @@ public class JsonMessage {
 	String userId;
 	private ArrayList<String> CategoryList;
 	String CategoryListString;
+	private ArrayList<String> filteredwordSet;
+	
+	public ArrayList<String> getFilteredwordSet() {
+		return filteredwordSet;
+	}
+
+	public void setFilteredwordSet(ArrayList<String> filteredwordSet) {
+		this.filteredwordSet = filteredwordSet;
+	}
 
 	public JsonMessage() {
 		super();
@@ -71,6 +80,6 @@ public class JsonMessage {
 	public String toString() {
 		return "JsonMessage [userId:" + userId
 				+ ", status:" + status + ", CategoryList:"
-				+ CategoryList + "]";
+				+ CategoryList +", filteredwordSet:"+filteredwordSet+ "]";
 	}
 }

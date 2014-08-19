@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -36,8 +37,11 @@ public class ApiAccess {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public JsonMessage doPreprocessing(String id, String searchString)
 			throws Exception {
+
+		System.out.println("start pre processing and classification");
 
 		if (!id.equals("") && !searchString.equals("")) {
 
@@ -58,7 +62,16 @@ public class ApiAccess {
 				jm.setUserId(id);
 				jm.setStatus("true");
 				jm.setMsg("classification done");
+
+				System.out.println("end pre processing and classification");
+
+				
+				  List<String> list = new ArrayList<String>(preprocessing .getFilteredwords());
+				  jm.setFilteredwordSet((ArrayList<String>) list);
+				 
+
 				return jm;
+
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 				jm.setUserId(id);
@@ -76,9 +89,12 @@ public class ApiAccess {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public JsonMessage doPreprocessing(String id) throws Exception {
 
 		jm.setUserId(id);
+		System.out.println("start pre processing and classification");
+
 		// preprocessing with SN data and searchString
 		if (userExists(id)) {
 
@@ -142,11 +158,13 @@ public class ApiAccess {
 				jm.setUserId(id);
 				jm.setStatus("true");
 				jm.setMsg("classification done for SN");
+
+				System.out.println("end pre processing and classification");
 				return jm;
 
 			} catch (Exception ex) {
 
-				System.out.println(ex.getMessage());
+				System.out.println(ex.getStackTrace());
 				jm.setUserId(id);
 				jm.setStatus("false");
 				jm.setMsg("internal error : " + ex.getMessage());
@@ -177,24 +195,25 @@ public class ApiAccess {
 				.entrySet()) {
 
 			String stringData = "";
-			for (Map.Entry<String, Integer> insideEntry : entry.getValue()
-					.getFilteredwords().entrySet()) {
-				stringData = stringData + insideEntry.getKey() + ":"
-						+ insideEntry.getValue() + ",";
+
+			for (Entry<String, WordVector> insideEntry : entry.getValue()
+					.getWordVectorList().entrySet()) {
+				stringData = stringData
+						+ insideEntry.getValue().getVectorItem() + ":"
+						+ insideEntry.getValue().getCount() + ",";
 			}
 
 			if (stringData.length() != 0) {
-
 				String vectorData = stringData.replaceAll("[']*", "");
 				String newVectorString = vectorData.substring(0,
 						vectorData.length() - 1);
-
 				System.out.println(entry.getKey() + " => " + newVectorString);
 
 				MysqlConnection.getDbConnection().setWeightMethod01(
 						Integer.parseInt(id), newVectorString,
-						entry.getValue().getFilteredwords().size(),
+						entry.getValue().getWordVectorList().size(),
 						entry.getKey());
+
 			}
 		}
 	}

@@ -7,11 +7,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import com.contentanalyzer.springservice.dao.MysqlConnection;
 
 import snowballstemmer.PorterStemmer;
+import sun.security.acl.WorldGroupImpl;
 import weka.core.Instance;
 import weka.core.Instances;
 import cmu.arktweetnlp.POSTagger;
@@ -28,17 +30,51 @@ public class Preprocessing {
 	 * Instances to be indexed.
 	 */
 	private Instances inputInstances;
+
 	/*
 	 * string data that user entered
 	 */
 
-	private String stringValue;
+	/**
+	 * @return the wordVectorList
+	 */
+	public HashMap<String, WordVector> getWordVectorList() {
+		return wordVectorList;
+	}
 
-	private HashMap<String, Integer> filteredWTokenSet = new HashMap<String, Integer>();
-	private HashMap<String, Integer> filteredwords = new HashMap<String, Integer>();
+	/**
+	 * @param wordVectorList
+	 *            the wordVectorList to set
+	 */
+	public void setWordVectorList(HashMap<String, WordVector> wordVectorList) {
+		this.wordVectorList = wordVectorList;
+	}
+
+	private String stringValue;
+	private ArrayList<String> filteredwords = new ArrayList<String>();
+
+	public void setFilteredwords(ArrayList<String> filteredwords) {
+		this.filteredwords = filteredwords;
+	}
+
 	private POSTagger postagger = new POSTagger();
 	private List<Token> tokenList = new ArrayList<Token>();
 
+	private HashMap<String, WordVector> wordVectorList = new HashMap<String, WordVector>();
+
+	private HashMap<String, PreWord> preWordList = new HashMap<String, PreWord>();
+
+	/**
+	 * @return the filteredwords
+	 */
+	public ArrayList<String> getFilteredwords() {
+		return filteredwords;
+	}
+
+	/**
+	 * @param filteredwords
+	 *            the filteredwords to set
+	 */
 	public Preprocessing() {
 
 	}
@@ -63,14 +99,6 @@ public class Preprocessing {
 
 	public void setStringValue(String stringValue) {
 		this.stringValue = stringValue;
-	}
-	
-	public HashMap<String, Integer> getFilteredwords() {
-		return filteredwords;
-	}
-
-	public void setFilteredwords(HashMap<String, Integer> filteredwords) {
-		this.filteredwords = filteredwords;
 	}
 
 	private void POSTagerTokenizeInstances() {
@@ -99,41 +127,49 @@ public class Preprocessing {
 			switch (token.getPOS()) {
 			case "A":
 			case "R":
-			case "#":
+			case "$":
 			case "^":
 			case "N":
+			case "V":
 				String word = token.getWord().replaceAll("#", "");
-				// System.out.println(token.getPOS() +" : "+token.getWord());
-				if (filteredWTokenSet.containsKey(word)) {
-					// update map entry
-					filteredWTokenSet
-							.put(word, filteredWTokenSet.get(word) + 1);
+				if (preWordList.containsKey(word)) {
+					// update list entry
+					preWordList.get(word).setCount(
+							preWordList.get(word).getCount() + 1);
 				} else {
 					// add new map entry
-					filteredWTokenSet.put(word, 1);
+					PreWord newWv = new PreWord(word, token.getPOS(), 1);
+					preWordList.put(word, newWv);
 				}
 			}
+			System.out.println("createFilteredTokens - " + token.getWord());
 		}
-		System.out.println("filteredWTokenSet : "
-				+ filteredWTokenSet.toString());
 	}
 
 	private void applayPorterStemmer() {
 		PorterStemmer stemmer = new PorterStemmer();
-		for (Map.Entry<String, Integer> entry : filteredWTokenSet.entrySet()) {
+		for (Entry<String, PreWord> entry : preWordList.entrySet()) {
 			stemmer.setCurrent(entry.getKey());
 			if (stemmer.stem()) {
 				// If stemming is successful obtain the stem of the given word
-				String word = stemmer.getCurrent();
-				if (filteredwords.containsKey(word)) {
-					filteredwords.put(word,
-							filteredwords.get(word) + entry.getValue());
+				String stemmerWord = stemmer.getCurrent();
+
+				if (wordVectorList.containsKey(stemmerWord)) {
+					// update wordvector object with new count value
+					wordVectorList.get(stemmerWord).setCount(
+							wordVectorList.get(stemmerWord).getCount()
+									+ entry.getValue().getCount());
 				} else {
-					filteredwords.put(word, entry.getValue());
+					// add new wordvector object
+					WordVector wv = new WordVector(stemmerWord, entry
+							.getValue().getCount(), entry.getValue().getWord()
+							+ "=" + entry.getValue().getPosTagger());
+					wordVectorList.put(stemmerWord, wv);
+					
+					filteredwords.add(stemmerWord);
 				}
 			}
+			System.out.println("applayPorterStemmer - "+ entry.getKey());
 		}
-		System.out.println("filteredwords : " + filteredwords.toString());
-
 	}
 }
