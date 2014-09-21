@@ -46,9 +46,13 @@ public class Classification {
 		smo.turnChecksOn();
 		Evaluation eTest = new Evaluation(trainingData); 
         eTest.evaluateModel(smo,trainingData); 
-        
+<<<<<<< HEAD
         System.out.println(eTest.toSummaryString());
         System.out.println(smo.toString());
+=======
+       // System.out.println(eTest.toSummaryString());
+       // System.out.println(smo.toString());
+>>>>>>> 7e9b25f97d0de1841cefc00d4a616d4e9445ce60
 	}
 
 	public void testClassifier() throws Exception {
