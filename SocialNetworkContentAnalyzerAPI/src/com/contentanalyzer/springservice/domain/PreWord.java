@@ -5,20 +5,42 @@ package com.contentanalyzer.springservice.domain;
 
 /**
  * @author YAS
- * 
- */
+ * @version 1.3
+ * @Desc Used to store posTaggered word with relevant tagger.
+ * */
 public class PreWord {
 
+	/**
+	 * tokenized word.
+	 */
 	private String word;
+	/**
+	 * posTagger of the given word.
+	 */
 	private String posTagger;
 
+	/**
+	 * word count.
+	 */
 	private int count;
 
+	/**
+	 * Default constructor.
+	 */
 	public PreWord() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * 
+	 * @param word
+	 *            word of the PreWord.
+	 * @param posTagger
+	 *            posTagger of the PreWord.
+	 * @param count
+	 *            count of the PreWord.
+	 */
 	public PreWord(String word, String posTagger, int count) {
 		super();
 		this.word = word;

@@ -7,79 +7,159 @@ import java.util.ArrayList;
 
 /**
  * @author YAS
- * 
- */
+ * @author Garushi
+ * @version 1.3
+ * @Desc A JsonMessage that SNCA API returned.
+ * */
 public class JsonMessage {
 
+	/**
+	 * Main message.
+	 */
 	String msg;
+	/**
+	 * Current status of the service.
+	 */
 	String status;
+	/**
+	 * user id that josn message belongs.
+	 */
 	String userId;
+	/**
+	 * Category List
+	 */
 	private ArrayList<String> CategoryList;
+	/**
+	 * Category List String
+	 */
 	String CategoryListString;
+	/**
+	 * filtered word Set
+	 */
 	private ArrayList<String> filteredwordSet;
-	
-	public ArrayList<String> getFilteredwordSet() {
-		return filteredwordSet;
-	}
 
-	public void setFilteredwordSet(ArrayList<String> filteredwordSet) {
-		this.filteredwordSet = filteredwordSet;
-	}
-
-	public JsonMessage() {
-		super();
-		this.status="false";
-		this.CategoryList = new ArrayList<String>();
-	}
-
-	public String getMsg() {
+	/**
+	 * @return the msg
+	 */
+	public final String getMsg() {
 		return msg;
 	}
 
-
-	public void setMsg(String msg) {
+	/**
+	 * @param msg
+	 *            the msg to set
+	 */
+	public final void setMsg(String msg) {
 		this.msg = msg;
 	}
-	public String getStatus() {
+
+	/**
+	 * @return the status
+	 */
+	public final String getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	/**
+	 * @param status
+	 *            the status to set
+	 */
+	public final void setStatus(String status) {
 		this.status = status;
 	}
 
-	public String getUserId() {
+	/**
+	 * @return the userId
+	 */
+	public final String getUserId() {
 		return userId;
 	}
 
-	public void setUserId(String userId) {
+	/**
+	 * @param userId
+	 *            the userId to set
+	 */
+	public final void setUserId(String userId) {
 		this.userId = userId;
 	}
 
-	public ArrayList<String> getCategoryList() {
+	/**
+	 * @return the categoryList
+	 */
+	public final ArrayList<String> getCategoryList() {
 		return CategoryList;
 	}
 
-	public void setCategoryList(ArrayList<String> categoryList) {
+	/**
+	 * @param categoryList
+	 *            the categoryList to set
+	 */
+	public final void setCategoryList(ArrayList<String> categoryList) {
 		CategoryList = categoryList;
 	}
-	
-	public String CategoryListToJson(){
-		
-		CategoryListString = "{";
-		for (int i = 0; i < CategoryList.size(); i++) {
-			CategoryListString = CategoryListString + i +":"+"\""+CategoryList.get(i)+"\",";
-		}
-		CategoryListString = CategoryListString.substring(0, CategoryListString.length() - 1);
-		CategoryListString = CategoryListString + "}";
-		
+
+	/**
+	 * @return the categoryListString
+	 */
+	public final String getCategoryListString() {
 		return CategoryListString;
 	}
-	
+
+	/**
+	 * @param categoryListString
+	 *            the categoryListString to set
+	 */
+	public final void setCategoryListString(String categoryListString) {
+		CategoryListString = categoryListString;
+	}
+
+	/**
+	 * @return the filteredwordSet
+	 */
+	public final ArrayList<String> getFilteredwordSet() {
+		return filteredwordSet;
+	}
+
+	/**
+	 * @param filteredwordSet
+	 *            the filteredwordSet to set
+	 */
+	public final void setFilteredwordSet(ArrayList<String> filteredwordSet) {
+		this.filteredwordSet = filteredwordSet;
+	}
+
+	/**
+	 * Default constructor.
+	 */
+	public JsonMessage() {
+		super();
+		this.status = "false";
+		this.CategoryList = new ArrayList<String>();
+	}
+
+	/**
+	 * Used to make CategoryListString as string representation
+	 * 
+	 * @return CategoryListString as string
+	 */
+	public String CategoryListToJson() {
+
+		CategoryListString = "{";
+		for (int i = 0; i < CategoryList.size(); i++) {
+			CategoryListString = CategoryListString + i + ":" + "\""
+					+ CategoryList.get(i) + "\",";
+		}
+		CategoryListString = CategoryListString.substring(0,
+				CategoryListString.length() - 1);
+		CategoryListString = CategoryListString + "}";
+
+		return CategoryListString;
+	}
+
 	@Override
 	public String toString() {
-		return "JsonMessage [userId:" + userId
-				+ ", status:" + status + ", CategoryList:"
-				+ CategoryList +", filteredwordSet:"+filteredwordSet+ "]";
+		return "JsonMessage [userId:" + userId + ", status:" + status
+				+ ", CategoryList:" + CategoryList + ", filteredwordSet:"
+				+ filteredwordSet + "]";
 	}
 }

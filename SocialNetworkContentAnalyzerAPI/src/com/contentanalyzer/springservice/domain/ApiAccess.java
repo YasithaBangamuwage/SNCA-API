@@ -20,16 +20,39 @@ import com.contentanalyzer.springservice.dao.MysqlConnection;
 import com.contentanalyzer.springservice.dao.WekaInstances;
 import com.contentanalyzer.springservice.domain.Preprocessing;
 
+/**
+ * @author YAS
+ * @author Garushi
+ * @version 1.8
+ * @Desc Used to access all API domain classes according to the RESTful web
+ *       service.
+ * */
 public class ApiAccess {
 
-	// to store preprocessing objects
+	/**
+	 * to store preprocessing objects.
+	 */
 	private HashMap<String, Preprocessing> preProcsObjectSet = new HashMap<String, Preprocessing>();
+	/**
+	 * Global JsonMessage object.
+	 */
 	JsonMessage jm = new JsonMessage();
 
+	/**
+	 * Default Constructor.
+	 */
 	public ApiAccess() {
 
 	}
 
+	/**
+	 * Used to check the user exists in the current API database.
+	 * 
+	 * @param id
+	 *            user id to check.
+	 * @return status
+	 * @throws SQLException
+	 */
 	private boolean userExists(String id) throws SQLException {
 		return MysqlConnection.getDbConnection().isExistData(
 				"SELECT social_feeds.user_id FROM social_feeds WHERE social_feeds.user_id ="
@@ -37,6 +60,17 @@ public class ApiAccess {
 
 	}
 
+	/**
+	 * do Preprocessing according to the user id and search string provided for
+	 * the service.
+	 * 
+	 * @param id
+	 *            user id
+	 * @param searchString
+	 *            user search string.
+	 * @return result status as JsonMessage
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	public JsonMessage doPreprocessing(String id, String searchString)
 			throws Exception {
@@ -65,10 +99,9 @@ public class ApiAccess {
 
 				System.out.println("end pre processing and classification");
 
-				
-				  List<String> list = new ArrayList<String>(preprocessing .getFilteredwords());
-				  jm.setFilteredwordSet((ArrayList<String>) list);
-				 
+				List<String> list = new ArrayList<String>(
+						preprocessing.getFilteredwords());
+				jm.setFilteredwordSet((ArrayList<String>) list);
 
 				return jm;
 
@@ -89,6 +122,14 @@ public class ApiAccess {
 		}
 	}
 
+	/**
+	 * do Preprocessing according to the user id (only SN data)
+	 * 
+	 * @param id
+	 *            user id
+	 * @return service result status as JsonMessage
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	public JsonMessage doPreprocessing(String id) throws Exception {
 
@@ -154,7 +195,7 @@ public class ApiAccess {
 						"DELETE FROM social_feeds WHERE user_id=" + id + "");
 
 				// do classification
-				SMOClassification(id);
+				// /////////////////////////////////////////////////////////////////////////////////SMOClassification(id);
 				jm.setUserId(id);
 				jm.setStatus("true");
 				jm.setMsg("classification done for SN");
@@ -189,6 +230,13 @@ public class ApiAccess {
 		}
 	}
 
+	/**
+	 * update Filtered Feeds of the user after pre process completely done.
+	 * 
+	 * @param id
+	 *            user id
+	 * @throws SQLException
+	 */
 	private void updateFilteredFeeds(String id) throws SQLException {
 
 		for (Map.Entry<String, Preprocessing> entry : preProcsObjectSet
@@ -218,6 +266,13 @@ public class ApiAccess {
 		}
 	}
 
+	/**
+	 * Do SMOClassification.
+	 * 
+	 * @param id
+	 *            user id
+	 * @throws Exception
+	 */
 	private void SMOClassification(String id) throws Exception {
 		ArrayList<String> PredictedList = new ArrayList<String>();
 
