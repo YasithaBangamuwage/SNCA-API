@@ -221,12 +221,12 @@ public class Preprocessing {
 				if (wordVectorList.containsKey(stemmerWord)) {
 					// update wordvector object with new count value
 					wordVectorList.get(stemmerWord).setCount(
-							wordVectorList.get(stemmerWord).getCount()
-									+ entry.getValue().getCount());
+							wordVectorList.get(stemmerWord).getCount()+ entry.getValue().getCount());
 				} else {
 					// add new wordvector object
+					//System.out.println(stemmerWord);
 					WordVector wv = new WordVector(stemmerWord, entry
-							.getValue().getCount(), entry.getValue().getWord()
+							.getValue().getCount(), stemmerWord
 							+ "=" + entry.getValue().getPosTagger());
 					wordVectorList.put(stemmerWord, wv);
 

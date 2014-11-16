@@ -195,7 +195,7 @@ public class ApiAccess {
 						"DELETE FROM social_feeds WHERE user_id=" + id + "");
 
 				// do classification
-				// /////////////////////////////////////////////////////////////////////////////////SMOClassification(id);
+				SMOClassification(id);
 				jm.setUserId(id);
 				jm.setStatus("true");
 				jm.setMsg("classification done for SN");
@@ -246,6 +246,10 @@ public class ApiAccess {
 
 			for (Entry<String, WordVector> insideEntry : entry.getValue()
 					.getWordVectorList().entrySet()) {
+				//System.out.println("wv getStemmer : "+insideEntry.getValue().getStemmer());
+				//System.out.println("wv getVectorItem : "+insideEntry.getValue().getVectorItem());
+				//System.out.println("wv getCount : "+insideEntry.getValue().getCount());
+				
 				stringData = stringData
 						+ insideEntry.getValue().getVectorItem() + ":"
 						+ insideEntry.getValue().getCount() + ",";
