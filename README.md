@@ -14,8 +14,8 @@ http://your_server_location_url/SocialNetworkContentAnalyzerAPI/access/filterCat
 
 http://your_server_location_url/SocialNetworkContentAnalyzerAPI/access/filterCategories/search_string
 
-*************How to use AdsInsite SNCA-API services**************
-=================================================================
+How to use AdsInsite SNCA-API services
+======================================
 
 1) You have to register users into AdsInsite.
 2) Call above web service urls with currect userids and search strings. 
